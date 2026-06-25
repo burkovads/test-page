@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Люблю тебя девочка моя</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%);
+            animation: backgroundShift 10s ease infinite;
+        }
+        @keyframes backgroundShift {
+            0% { background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%); }
+            50% { background: linear-gradient(45deg, #a1c4fd 0%, #c2e9fb 100%); }
+            100% { background: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 100%); }
+        }
+        #app {
+            width: 95%;
+            max-width: 900px;
+            border-radius: 25px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            animation: float 6s ease-in-out infinite;
+            background: white;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+        .screen {
+            display: none;
+            padding: 30px;
+            text-align: center;
+            min-height: 600px;
+            position: relative;
+            opacity: 0;
+            animation: fadeIn 0.8s forwards;
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        .screen.active {
+            display: block;
+        }
+        /* Контейнер для трёх фоток */
+        .cats-grid {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin: 30px 0 40px;
+            flex-wrap: wrap;
+        }
+        .cat-photo {
+            width: 220px;
+            height: 220px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.5s ease;
+            border: 5px solid white;
+            animation: catFloat 4s ease-in-out infinite;
+            animation-delay: calc(var(--i) * 0.5s);
+            cursor: pointer;
+        }
+        .cat-photo:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+        @keyframes catFloat {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        /* Фоновые цвета для каждого сценария */
+        #start-screen {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        #scenario-normal {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+        #scenario-sad {
+            background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);
+        }
+        #scenario-great {
+            background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+        }
+        #final-screen {
+            background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 2.8em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            animation: slideDown 0.8s ease-out;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 18px 30px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 8px 20px rgba(238, 90, 36, 0.4);
+            animation: pulse 2s infinite;
+        }
+        button:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 12px 25px rgba(238, 90, 36, 0.6);
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        
+        .action-button {
+            margin-top: 30px;
+            padding: 15px 35px;
+            background: linear-gradient(45deg, #6b8e23, #9acd32);
+            font-size: 1.3em;
+            animation: bounce 1.5s infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .message {
+            line-height: 1.8;
+            color: #2c3e50;
+            margin: 0 auto;
+            max-width: 800px;
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            font-size: 1.2em;
+            animation: messageAppear 1s ease-out;
+        }
+        @keyframes messageAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        
+        .message p {
+            margin-bottom: 18px;
+            opacity: 0;
+            animation: textReveal 0.5s forwards;
+            animation-delay: calc(var(--i) * 0.2s);
+        }
+        .message p:nth-child(1) { --i: 1; }
+        .message p:nth-child(2) { --i: 2; }
+        .message p:nth-child(3) { --i: 3; }
+        .message p:nth-child(4) { --i: 4; }
+        .message p:nth-child(5) { --i: 5; }
+        .message p:nth-child(6) { --i: 6; }
+        @keyframes textReveal {
+            to { opacity: 1; }
+        }
+        
+        .animated-text {
+            margin-top: 30px;
+            font-size: 2.5em;
+            color: #e74c3c;
+            font-weight: bold;
+            text-shadow: 3px 3px 8px rgba(0, 0, 0, 0.3);
+            animation:
+                pulse 2s infinite,
+                rainbow 4s linear infinite,
+                shake 0.5s ease-in-out infinite alternate;
+        }
+        @keyframes rainbow {
+            0% { color: #e74c3c; }
+            25% { color: #f39c12; }
+            50% { color: #2ecc71; }
+            75% { color: #3498db; }
+            100% { color: #e74c3c; }
+        }
+        @keyframes shake {
+            from { transform: rotate(-2deg); }
+            to { transform: rotate(2deg); }
+        }
+        
+        /* Игра: лови сердечки */
+        .heart-game {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            z-index: 1000;
+            border: 2px solid #ff6b6b;
+        }
+        
+        .game-heart {
+            position: fixed;
+            font-size: 30px;
+            animation: fall 5s linear forwards;
+            z-index: 999;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .game-heart:hover {
+            transform: scale(1.2);
+        }
+        
+        @keyframes fall {
+            to { 
+                transform: translateY(100vh) rotate(360deg); 
+                opacity: 0;
+            }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 15px;
+            height: 15px;
+            pointer-events: none;
+            z-index: 1001;
+        }
+        
+        .meow-bubble {
+            position: fixed;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            font-weight: bold;
+            color: #333;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+        }
+        .meow-bubble.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            #app {
+                width: 98%;
+                border-radius: 20px;
+            }
+            .screen {
+                padding: 20px;
+                min-height: auto;
+            }
+            h1 {
+                font-size: 2.2em;
+            }
+            .cats-grid {
+                gap: 15px;
+                margin: 20px 0 30px;
+            }
+            .cat-photo {
+                width: 160px;
+                height: 160px;
+            }
+            .message {
+                font-size: 1em;
+                padding: 20px;
+                margin: 0 auto 20px;
+            }
+            button {
+                padding: 15px 25px;
+                font-size: 1.1em;
+            }
+            .animated-text {
+                font-size: 2em;
+            }
+            .heart-game {
+                top: 10px;
+                right: 10px;
+                font-size: 0.9em;
+                padding: 8px 15px;
+            }
+            .game-heart {
+                font-size: 24px;
+            }
+        }
+        @media (max-width: 600px) {
+            .cat-photo {
+                width: 130px;
+                height: 130px;
+            }
+            .cats-grid {
+                gap: 10px;
+            }
+        }
+        @media (max-width: 480px) {
+            #app {
+                width: 100%;
+                border-radius: 15px;
+            }
+            .screen {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .cat-photo {
+                width: 100px;
+                height: 100px;
+            }
+            .buttons {
+                gap: 12px;
+            }
+            button {
+                padding: 14px 20px;
+                font-size: 1em;
+            }
+            .message {
+                padding: 15px;
+                font-size: 0.95em;
+            }
+            .animated-text {
+                font-size: 1.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Счётчик игры -->
+    <div class="heart-game" id="heartGame">
+        💖 Поймано: <span id="heartCounter">0</span>
+    </div>
+    
+    <div id="app">
+        <!-- Экран выбора сценария -->
+        <div class="screen active" id="start-screen">
+            <h1>Как твои дела?</h1>
+            <div class="cats-grid">
+                <img src="image/name1.jpg" class="cat-photo" style="--i: 0;" alt="Котик 1" onclick="meowEffect(this)">
+                <img src="image/name2.jpg" class="cat-photo" style="--i: 1;" alt="Котик 2" onclick="meowEffect(this)">
+                <img src="image/name3.jpg" class="cat-photo" style="--i: 2;" alt="Котик 3" onclick="meowEffect(this)">
+            </div>
+            <div class="buttons">
+                <button onclick="createConfetti(); showScenario('normal')">Привет, нормально</button>
+                <button onclick="createConfetti(); showScenario('sad')">Привет, грустно :(</button>
+                <button onclick="createConfetti(); showScenario('great')">Привет, всё отлично!</button>
+            </div>
+            <div class="animated-text">Нажми на котиков! 🐾</div>
+        </div>
+        <!-- Сценарий 1: Нормально -->
+        <div class="screen" id="scenario-normal">
+            <div class="cats-grid">
+                <img src="image/name4.jpg" class="cat-photo" style="--i: 0;" alt="Котик нормальный 1" onclick="meowEffect(this)">
+                <img src="image/name5.jpg" class="cat-photo" style="--i: 1;" alt="Котик нормальный 2" onclick="meowEffect(this)">
+                <img src="image/name6.jpg" class="cat-photo" style="--i: 2;" alt="Котик нормальный 3" onclick="meowEffect(this)">
+            </div>
+            <div class="message">
+                <p>А чо эта ты не прыгаешь от счастья, что закончила эту шаражкину контору?</p>
+                <p>Знаешь, наверное, самое важное (ну для меня это точно), красный диплом — это большой труд! Ты у меня умничка, я очень сильно горжусь тобой и я счастлив, что ты смогла, ты это сделала</p>
+                <p>Ты не сдалась, даже когда хотелось всё бросить и пойти спать:) (ну изредка ты так делала)</p>
+                <p>Пусть следующий этап будет таким же успешным! ♥ </p>
+                <p>Мурр-поздравляю ещё раз! 🐾</p>
+            </div>
+            <button class="action-button" onclick="createConfetti(); showFinalScreen()">Спасибо!</button>
+        </div>
+        <!-- Сценарий 2: Грустно -->
+        <div class="screen" id="scenario-sad">
+            <div class="cats-grid">
+                <img src="image/name7.jpg" class="cat-photo" style="--i: 0;" alt="Котик грустный 1" onclick="meowEffect(this)">
+                <img src="image/name8.jpg" class="cat-photo" style="--i: 1;" alt="Котик грустный 2" onclick="meowEffect(this)">
+                <img src="image/name9.jpg" class="cat-photo" style="--i: 2;" alt="Котик грустный 3" onclick="meowEffect(this)">
+            </div>
+            <div class="message">
+                <p>Не понял, чо эта тебе грустно? У тебя же есть я:) Твой котик.</p>
+                <p>Тебе грустно что ты прощаешься с этой шаражкиной контрой? Ахаххаа, и славу богу.</p>
+                <p>На самом деле, ты у меня огромная умничка. Я тобой горжусь. Ты справилась с ещё одним этапом в своей жизни. Красотка.</p>
+                <p>Не грусти. Впереди - новые возможности. Мур-мур-мур. Лю тя</p>
+            </div>
+            <button class="action-button" onclick="createConfetti(); showFinalScreen()">Спасибо, стало легче</button>
+        </div>
+        <!-- Сценарий 3: Отлично -->
+        <div class="screen" id="scenario-great">
+            <div class="cats-grid">
+                <img src="image/name10.jpg" class="cat-photo" style="--i: 0;" alt="Котик отличный 1" onclick="meowEffect(this)">
+                <img src="image/name11.jpg" class="cat-photo" style="--i: 1;" alt="Котик отличный 2" onclick="meowEffect(this)">
+                <img src="image/name12.jpg" class="cat-photo" style="--i: 2;" alt="Котик отличный 3" onclick="meowEffect(this)">
+            </div>
+            <div class="message">
+                <p>♥Ума моя♥</p>
+                <p>Красный диплом — это победа, к которой ты стремилась и шла. Ты её заслужила!</p>
+                <p>Пусть этот успех станет стартом для ещё более крутых достижений.</p>
+                <p>Путешествуй, учись, пробуй новое, а главное — наслаждайся жизнью!</p>
+                <p>Ты — ваще крутышка, и мир теперь точно станет лучше с твоим участием.</p>
+                <p>Мурр-ура! Лю тя🎉🐾</p>
+            </div>
+            <button class="action-button" onclick="createConfetti(); showFinalScreen()">Ура!</button>
+        </div>
+        <!-- Финальный экран -->
+        <div class="screen" id="final-screen">
+            <div class="cats-grid">
+                <img src="image/name13.jpg" class="cat-photo" style="--i: 0;" alt="Котик финальный 1" onclick="meowEffect(this)">
+                <img src="image/name14.jpg" class="cat-photo" style="--i: 1;" alt="Котик финальный 2" onclick="meowEffect(this)">
+                <img src="image/name15.jpg" class="cat-photo" style="--i: 2;" alt="Котик финальный 3" onclick="meowEffect(this)">
+            </div>
+            <div class="message">
+                <p>Поздравляю с красным дипломом!</p>
+                <p>Будь счастлива, удачи во всём, и пусть рядом всегда будут только те, кто тебя поддерживает.</p>
+                <p>Желаю тебе деньгав много, счастья побольше, здоровья покрепче</p>
+                <p>И помни: твой котик следит за твоими успехами и гордится тобой.</p>
+                <p>Люблю тебя! ❤️🐾</p>
+            </div>
+            <button class="action-button" onclick="createConfetti(); closeApp()">Закрыть</button>
+            <div class="animated-text">С выпускным!</div>
+        </div>
+    </div>
+    <script>
+        let heartCounter = 0;
+        let gameActive = true;
+        let gameInterval;
+        
+        // Создаем плавающие сердечки для игры - ИСПРАВЛЕННАЯ ВЕРСИЯ
+        function createGameHearts() {
+            if (!gameActive) return;
+            
+            const heart = document.createElement('div');
+            heart.className = 'game-heart';
+            heart.innerHTML = '💖';
+            heart.style.left = Math.random() * 85 + 5 + 'vw'; // Не слишком близко к краям
+            heart.style.top = '-50px';
+            heart.style.fontSize = (Math.random() * 30 + 20) + 'px';
+            heart.style.animationDuration = (Math.random() * 3 + 3) + 's';
+            
+            // Обработчик клика - РАБОТАЕТ!
+            heart.onclick = function(e) {
+                e.stopPropagation();
+                
+                if (heart.classList.contains('clicked')) return;
+                heart.classList.add('clicked');
+                
+                heartCounter++;
+                document.getElementById('heartCounter').textContent = heartCounter;
+                
+                // Эффект при клике
+                createConfettiAtPosition(
+                    heart.getBoundingClientRect().left + heart.clientWidth / 2,
+                    heart.getBoundingClientRect().top + heart.clientHeight / 2
+                );
+                
+                // Останавливаем анимацию
+                heart.style.animationPlayState = 'paused';
+                heart.style.opacity = '0.5';
+                
+                // Удаляем через 0.3 секунды
+                setTimeout(() => {
+                    if (heart.parentNode) {
+                        heart.remove();
+                    }
+                }, 300);
+                
+                // Проверка на победу
+                if (heartCounter >= 10) {
+                    document.getElementById('heartGame').innerHTML = '🎉 Ты поймала 10 сердечек! Ты чемпион! 🏆';
+                    document.getElementById('heartGame').style.background = 'linear-gradient(45deg, #FFD700, #FFA500)';
+                    gameActive = false;
+                    
+                    // Мега-конфетти
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => createConfetti(), i * 200);
+                    }
+                    
+                    setTimeout(() => {
+                        document.getElementById('heartGame').innerHTML = 
+                            '💖 Поймано: <span id="heartCounter">' + heartCounter + '</span>';
+                        document.getElementById('heartGame').style.background = '';
+                        gameActive = true;
+                        heartCounter = 0;
+                        document.getElementById('heartCounter').textContent = '0';
+                    }, 4000);
+                }
+            };
+            
+            // Удаляем сердечко, если его не поймали
+            heart.onanimationend = function() {
+                if (!heart.classList.contains('clicked') && heart.parentNode) {
+                    heart.remove();
+                }
+            };
+            
+            document.body.appendChild(heart);
+        }
+        
+        // Запускаем игру через 2 секунды после загрузки
+        setTimeout(() => {
+            gameInterval = setInterval(createGameHearts, 1500);
+            
+            // Подсказка
+            const tip = document.createElement('div');
+            tip.className = 'meow-bubble show';
+            tip.textContent = '🎮 Игра: лови падающие сердечки! Кликай на них!';
+            tip.style.left = '50%';
+            tip.style.top = '80px';
+            tip.style.transform = 'translateX(-50%)';
+            document.body.appendChild(tip);
+            
+            setTimeout(() => {
+                tip.classList.remove('show');
+                setTimeout(() => {
+                    if (tip.parentNode) tip.remove();
+                }, 300);
+            }, 4000);
+        }, 2000);
+        
+        // Эффект мяуканья при клике на котиков
+        function meowEffect(element) {
+            const bubble = document.createElement('div');
+            bubble.className = 'meow-bubble';
+            const messages = ['Мяу! 😻', 'Мурр! 🐾', 'Привет! 😸', 'Класс! 👍', 'Ура! 🎉'];
+            bubble.textContent = messages[Math.floor(Math.random() * messages.length)];
+            
+            const rect = element.getBoundingClientRect();
+            bubble.style.left = (rect.left + rect.width / 2 - 50) + 'px';
+            bubble.style.top = (rect.top - 60) + 'px';
+            bubble.style.minWidth = '100px';
+            bubble.style.textAlign = 'center';
+            
+            document.body.appendChild(bubble);
+            
+            setTimeout(() => {
+                bubble.classList.add('show');
+            }, 10);
+            
+            createConfettiAtPosition(rect.left + rect.width / 2, rect.top + rect.height / 2);
+            
+            setTimeout(() => {
+                bubble.classList.remove('show');
+                setTimeout(() => {
+                    if (bubble.parentNode) bubble.remove();
+                }, 300);
+            }, 2000);
+        }
+        
+        // Создаем конфетти
+        function createConfetti() {
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.top = '-20px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                confetti.style.width = Math.random() * 15 + 5 + 'px';
+                confetti.style.height = Math.random() * 15 + 5 + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                
+                document.body.appendChild(confetti);
+                
+                const animation = confetti.animate([
+                    { transform: 'translateY(0) rotate(0deg)', opacity: 1 },
+                    { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+                ], {
+                    duration: Math.random() * 2000 + 1000,
+                    easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+                });
+                
+                animation.onfinish = () => {
+                    if (confetti.parentNode) confetti.remove();
+                };
+            }
+        }
+        
+        // Создаем конфетти в определенной позиции
+        function createConfettiAtPosition(x, y) {
+            for (let i = 0; i < 10; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = x + 'px';
+                confetti.style.top = y + 'px';
+                confetti.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 60%)`;
+                confetti.style.width = Math.random() * 10 + 5 + 'px';
+                confetti.style.height = Math.random() * 10 + 5 + 'px';
+                
+                document.body.appendChild(confetti);
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 5 + 2;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity;
+                
+                let posX = 0;
+                let posY = 0;
+                let opacity = 1;
+                let frame = 0;
+                
+                function animate() {
+                    posX += vx;
+                    posY += vy;
+                    opacity -= 0.02;
+                    frame++;
+                    
+                    confetti.style.transform = `translate(${posX * frame * 0.1}px, ${posY * frame * 0.1}px)`;
+                    confetti.style.opacity = opacity;
+                    
+                    if (opacity > 0 && frame < 60) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        if (confetti.parentNode) confetti.remove();
+                    }
+                }
+                
+                animate();
+            }
+        }
+        
+        // Функция для показа выбранного сценария
+        function showScenario(scenario) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            const scenarioScreen = document.getElementById('scenario-' + scenario);
+            if (scenarioScreen) {
+                scenarioScreen.classList.add('active');
+            }
+        }
+        
+        // Функция для показа финального экрана
+        function showFinalScreen() {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById('final-screen').classList.add('active');
+            createConfetti();
+        }
+        
+        // Функция для закрытия приложения
+        function closeApp() {
+            createConfetti();
+            if (gameInterval) clearInterval(gameInterval);
+            
+            document.querySelector('#app').style.animation = 'fadeOut 1s forwards';
+            setTimeout(() => {
+                alert('Поздравляю ещё раз с красным дипломом! Люблю тебя! ❤️🎓\n\nТы поймала ' + heartCounter + ' сердечек! 🏆');
+            }, 800);
+        }
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('start-screen').classList.add('active');
+            
+            // Добавляем CSS для fadeOut
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeOut {
+                    to { opacity: 0; transform: scale(0.9); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Пасхалка: двойной клик по заголовку
+            document.querySelector('h1').addEventListener('dblclick', function() {
+                const secretMsg = document.createElement('div');
+                secretMsg.className = 'meow-bubble show';
+                secretMsg.textContent = '💖 Секрет! Ты самая лучшая! 🥳';
+                secretMsg.style.left = '50%';
+                secretMsg.style.top = '50%';
+                secretMsg.style.transform = 'translate(-50%, -50%)';
+                secretMsg.style.fontSize = '1.5em';
+                secretMsg.style.padding = '20px 30px';
+                document.body.appendChild(secretMsg);
+                
+                createConfetti();
+                
+                setTimeout(() => {
+                    secretMsg.classList.remove('show');
+                    setTimeout(() => {
+                        if (secretMsg.parentNode) secretMsg.remove();
+                    }, 300);
+                }, 3000);
+            });
+        });
+    </script>
+</body>
+</html>
